@@ -3,12 +3,17 @@
 <title>Box2D testbed</title>
 <script>
 var require = function(){
-  return {Box2D: Box2D};
+  return {
+    Box2D: Box2D,
+    Stone: Stone
+  };
 };
-var exports = {};
+
+exports = {};
 </script>
 <script src="js/Box2D.js"></script>
 <script src="js/Game.js"></script>
+<script src="js/Stone.js"></script>
 <style>
 canvas{
   position: absolute;
@@ -26,7 +31,7 @@ var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 
 var game = new Game();
 var world = game.world;
-game.setFps(30);
+game.setFps(5);
 
 var scale = 300;
 
