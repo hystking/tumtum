@@ -1,0 +1,96 @@
+<html>
+<head>
+<title>Box2D testbed</title>
+<script>
+var require = function(){
+  return {Box2D: Box2D};
+};
+var exports = {};
+</script>
+<script src="js/Box2D.js"></script>
+<script src="js/Game.js"></script>
+<style>
+canvas{
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+</style>
+</head>
+<body>
+<canvas id="canvas_debug" width="800" height="600"></canvas>
+<canvas id="canvas_mine" width="800" height="600"></canvas>
+</body>
+<script>
+var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
+
+var game = new Game();
+var world = game.world;
+game.setFps(30);
+
+var scale = 300;
+
+function debugDraw(){
+  var debugDraw = new b2DebugDraw();
+  debugDraw.SetSprite(document.getElementById("canvas_debug").getContext("2d"));
+  debugDraw.SetDrawScale(scale);
+  debugDraw.SetFillAlpha(0.5);
+  debugDraw.SetLineThickness(1.0);
+  debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
+  world.SetDebugDraw(debugDraw);
+ }
+
+var ctx = document.getElementById("canvas_mine").getContext("2d");
+ctx.fillStyle = "#9ea5af";
+ctx.strokeStyle = "gray";
+ctx.lineWidth = 3;
+ctx.lineCap = "round";
+myDraw = function(ctx){
+  var body = this.world.GetBodyList();
+  var shape, fixture, pos_body, pos_v, angle, vs, i, x, y;
+  ctx.clearRect(0, 0, 800, 600);
+  while(body){
+    pos_body = body.GetPosition();
+    rad = body.GetAngle();
+    fixture = body.GetFixtureList();
+    while(fixture){
+      shape = fixture.GetShape();
+
+      vs = shape.GetVertices();
+      pos_v = vs[0];
+      x0 = pos_v.x * Math.cos(rad) - pos_v.y * Math.sin(rad) + pos_body.x;
+      y0 = pos_v.x * Math.sin(rad) + pos_v.y * Math.cos(rad) + pos_body.y;
+      ctx.beginPath();
+      ctx.moveTo(x0*scale, y0*scale);
+      for(i=1; i<vs.length; i++){
+        pos_v = vs[i];
+        x = pos_v.x * Math.cos(rad) - pos_v.y * Math.sin(rad) + pos_body.x;
+        y = pos_v.x * Math.sin(rad) + pos_v.y * Math.cos(rad) + pos_body.y;
+        ctx.lineTo(x*scale, y*scale);
+      }
+      ctx.lineTo(x0*scale, y0*scale);
+      ctx.fill();
+      ctx.stroke();
+      fixture = fixture.GetNext();
+    }
+    body = body.GetNext();
+  }
+  
+}.bind(game);
+
+setInterval(function(){
+  game.step();
+  //world.DrawDebugData();
+  myDraw(ctx);
+  world.ClearForces();
+  /*
+  var body = world.GetBodyList();
+  while(body){
+    //console.log(body.GetPosition());
+    body = body.GetNext();
+  }*/
+}, 1000/game.fps);
+
+debugDraw();
+</script>
+</html>
