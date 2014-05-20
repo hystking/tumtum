@@ -44,9 +44,8 @@ var LocalGame = function(ctx){
   this.gradBack.addColorStop(0, "#fff");
   this.gradBack.addColorStop(1, "#bcd");
 
-  ctx.strokeStyle = "gray";
-  ctx.lineWidth = 3;
   ctx.lineCap = "round";
+  ctx.lineWidth = 3;
   this.ctx = ctx;
 };
 LocalGame.prototype.step = function(){
@@ -74,6 +73,7 @@ LocalGame.prototype.draw = function(){
   var stone_data = this.stone_data;
   var ctx = this.ctx;
 
+  ctx.strokeStyle = "gray";
 
   ctx.fillStyle = this.gradBack;
   ctx.fillRect(0, 0, 1680, 600);
@@ -110,6 +110,12 @@ LocalGame.prototype.draw = function(){
     ctx.fill();
     ctx.stroke();
   }
+  ctx.strokeStyle = "#f88";
+  ctx.beginPath();
+  ctx.moveTo(0, 100);
+  ctx.lineTo(1680, 100);
+  ctx.stroke();
+  ctx.strokeStyle = "gray";
 };
 LocalGame.prototype.setPosData = function(pos_data){
   this.pos_data = pos_data; 
