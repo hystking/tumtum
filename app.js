@@ -9,7 +9,9 @@ io.configure(function () {
   io.set("transports", ["xhr-polling"]); 
   io.set("polling duration", 10); 
  });
-server.listen(8888);
+
+var port = process.env.PORT || 5000;
+server.listen(port);
 
 var ptn = /^\/([a-zA-Z0-9_]+)$/;
 
