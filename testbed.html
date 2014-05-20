@@ -23,7 +23,7 @@ canvas{
 </style>
 </head>
 <body>
-<canvas id="canvas_mine" width="1200" height="1600"></canvas>
+<canvas id="canvas_mine" width="1680" height="600"></canvas>
 </body>
 <script>
 var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
@@ -118,7 +118,7 @@ myStep = function(ctx){
 myDraw = function(ctx){
   var body = this.world.GetBodyList();
   var shape, fixture, pos_body, pos_v, angle, vs, i, x, y;
-  ctx.clearRect(0, 0, 1200, 1600);
+  ctx.clearRect(0, 0, 1680, 600);
   for(var i in stone_data){
     var pos_body = pos_data_local[i];
     if(!pos_body) continue;

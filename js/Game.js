@@ -17,12 +17,21 @@ var Game = function(){
 
   var world = new b2World(new b2Vec2(0, 9.8), true);
 
-  var groundShape = createShapeBox(1.5, 1);
-  var groundFixtureDef = createFixtureDef(0., 1., 0.0, groundShape);
-  var groundBodyDef = createStaticBodyDef(2, 6);
-  var groundBody = world.CreateBody(groundBodyDef);
-  groundBody.CreateFixture(groundFixtureDef);
+  var groundShape = createShapeBox(0.2, 1.1);
+  var groundFixtureDef = createFixtureDef(0, 1., 0, groundShape);
 
+  var addGround = function(x){
+    var groundBodyDef = createStaticBodyDef(x, 3);
+    var groundBody = world.CreateBody(groundBodyDef);
+    groundBody.CreateFixture(groundFixtureDef);
+  };
+  addGround(0.4);
+  addGround(1.2);
+  addGround(2.0);
+  addGround(2.8);
+  addGround(3.6);
+  addGround(4.4);
+  addGround(5.2);
   this.world = world;
   this.setFps(60);
   this.timer_id = -1;
@@ -70,18 +79,18 @@ StoneData.prototype.getPosData = function(force){
   if(!force && !body.IsAwake()) return null;
   pos = body.GetPosition();
   a = body.GetAngle();
-  if(
-    !force &&
-    Math.abs(this.px - pos.x) < .002 &&
-    Math.abs(this.py - pos.y) < .001 &&
-    Math.abs(this.pa - a) < .1
-    ) return null;
-
-  v = body.GetLinearVelocity();
   p = {};
   p.x = pos.x*SCALE|0;
   p.y = pos.y*SCALE|0;
   p.a = (a*100|0)/100;
+  if(
+    !force &&
+    Math.abs(this.px - p.x) < 1 &&
+    Math.abs(this.py - p.y) < 1 &&
+    Math.abs(this.pa - a) < .02
+    ) return null;
+
+  v = body.GetLinearVelocity();
   p.vx = v.x*SCALE|0;
   p.vy = v.y*SCALE|0;
   
