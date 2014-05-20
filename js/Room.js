@@ -17,7 +17,7 @@ var Room = function(io, name_room){
     data = this._game.getStonesPosData();
     if(Object.keys(data).length <= 0) return;
     this._room.emit("posData", data);
-  }).bind(this), 100);
+  }).bind(this), 200);
 };
 
 Room.prototype._onConnection = function(socket){

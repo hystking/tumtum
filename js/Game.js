@@ -71,7 +71,7 @@ StoneData.prototype.getData = function(){
 StoneData.prototype.getPosData = function(force){
   var pos, a, v, p;
   var body = this.body;
-  if(!force && !body.IsAwake()) return null;
+  //if(!force && !body.IsAwake()) return null;
   pos = body.GetPosition();
   a = body.GetAngle();
   p = {};

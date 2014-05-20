@@ -63,6 +63,9 @@ LocalGame.prototype.step = function(){
 
     pos.x += pos.vx/10;
     pos.y += pos.vy/10;
+
+    pos.vx *= 0.8;
+    pos.vy *= 0.8;
   }
 };
 LocalGame.prototype.draw = function(){
