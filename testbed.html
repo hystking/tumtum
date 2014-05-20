@@ -23,18 +23,18 @@ canvas{
 </style>
 </head>
 <body>
-<canvas id="canvas_debug" width="800" height="600"></canvas>
-<canvas id="canvas_mine" width="800" height="600"></canvas>
+<canvas id="canvas_mine" width="1200" height="1600"></canvas>
 </body>
 <script>
 var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 
 var game = new Game();
 var world = game.world;
-game.setFps(5);
+game.setFps(30);
 
-var scale = 300;
+var scale = 1;
 
+/*
 function debugDraw(){
   var debugDraw = new b2DebugDraw();
   debugDraw.SetSprite(document.getElementById("canvas_debug").getContext("2d"));
@@ -44,48 +44,112 @@ function debugDraw(){
   debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
   world.SetDebugDraw(debugDraw);
  }
+*/
 
 var ctx = document.getElementById("canvas_mine").getContext("2d");
-ctx.fillStyle = "#9ea5af";
 ctx.strokeStyle = "gray";
 ctx.lineWidth = 3;
 ctx.lineCap = "round";
+
+pos_data_local = {};
+
+setStoneData = function(){
+  stone_data = game.getStonesData();
+  for(var i in pos_data_local){
+    if(!stone_data[i]){
+      delete pos_data_local[i];
+    }
+  }
+  for(var i in stone_data){
+    var stone = stone_data[i];
+    var pos_local = pos_data_local[i];
+    if(pos_local){
+      pos[i] = {
+        x: stone.pos.x,
+        y: stone.pos.y,
+        vx: stone.pos.vx,
+        vy: stone.pos.vy,
+        a: stone.pos.a
+      }
+    }else{
+      pos_data_local[i] = {
+        x: stone.pos.x,
+        y: stone.pos.y,
+        a: stone.pos.a
+      }
+    }
+  }
+};
+
+document.getElementById("canvas_mine").addEventListener("mouseup", function(e){
+  console.log(e);
+  game.addStone(new Stone(0.1), e.offsetX/300, e.offsetY/300, 0, 0);
+  setStoneData();
+});
+
+setPosData = function(){
+  pos_data = game.getStonesPosData();
+  console.log(Object.keys(pos_data).length);
+};
+
+setStoneData();
+setPosData();
+setInterval(function(){
+  setPosData();
+}, 1000/10);
+setInterval(function(){
+  setStoneData();
+}, 1000);
+
+myStep = function(ctx){
+  for(var i in pos_data){
+    pos_local = pos_data_local[i];
+    if(!pos_local) continue;
+    pos = pos_data[i];
+    pos_local.x += (pos.x - pos_local.x) * .1;
+    pos_local.y += (pos.y - pos_local.y) * .22;
+    pos_local.a += (pos.a - pos_local.a) * .1;
+
+    pos.x += pos.vx/10;
+    pos.y += pos.vy/10;
+  }
+}
+
 myDraw = function(ctx){
   var body = this.world.GetBodyList();
   var shape, fixture, pos_body, pos_v, angle, vs, i, x, y;
-  ctx.clearRect(0, 0, 800, 600);
-  while(body){
-    pos_body = body.GetPosition();
-    rad = body.GetAngle();
-    fixture = body.GetFixtureList();
-    while(fixture){
-      shape = fixture.GetShape();
+  ctx.clearRect(0, 0, 1200, 1600);
+  for(var i in stone_data){
+    var pos_body = pos_data_local[i];
+    if(!pos_body) continue;
+    var rad = pos_body.a;
+    var stone = stone_data[i];
 
-      vs = shape.GetVertices();
-      pos_v = vs[0];
-      x0 = pos_v.x * Math.cos(rad) - pos_v.y * Math.sin(rad) + pos_body.x;
-      y0 = pos_v.x * Math.sin(rad) + pos_v.y * Math.cos(rad) + pos_body.y;
-      ctx.beginPath();
-      ctx.moveTo(x0*scale, y0*scale);
-      for(i=1; i<vs.length; i++){
-        pos_v = vs[i];
-        x = pos_v.x * Math.cos(rad) - pos_v.y * Math.sin(rad) + pos_body.x;
-        y = pos_v.x * Math.sin(rad) + pos_v.y * Math.cos(rad) + pos_body.y;
-        ctx.lineTo(x*scale, y*scale);
-      }
-      ctx.lineTo(x0*scale, y0*scale);
-      ctx.fill();
-      ctx.stroke();
-      fixture = fixture.GetNext();
+    ctx.fillStyle = stone.color;
+
+    var vs = stone.vs;
+    pos_v = vs[0];
+    x0 = pos_v.x * Math.cos(rad) - pos_v.y * Math.sin(rad) + pos_body.x;
+    y0 = pos_v.x * Math.sin(rad) + pos_v.y * Math.cos(rad) + pos_body.y;
+
+    ctx.beginPath();
+    ctx.moveTo(x0*scale, y0*scale);
+    for(var j=0; j<vs.length; j++){
+      pos_v = vs[j];
+      x = pos_v.x * Math.cos(rad) - pos_v.y * Math.sin(rad) + pos_body.x;
+      y = pos_v.x * Math.sin(rad) + pos_v.y * Math.cos(rad) + pos_body.y;
+      ctx.lineTo(x*scale, y*scale);
     }
-    body = body.GetNext();
+    ctx.lineTo(x0*scale, y0*scale);
+    ctx.fill();
+    ctx.stroke();
   }
-  
 }.bind(game);
 
 setInterval(function(){
   game.step();
   //world.DrawDebugData();
+  myStep();
   myDraw(ctx);
   world.ClearForces();
   /*
@@ -96,6 +160,6 @@ setInterval(function(){
   }*/
 }, 1000/game.fps);
 
-debugDraw();
+//debugDraw();
 </script>
 </html>

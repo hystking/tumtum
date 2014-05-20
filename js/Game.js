@@ -3,6 +3,7 @@ var Stone = require("./Stone").Stone;
 
 /*--------------------------------------------------------*/
 
+SCALE = 300;
 
 /*--------------------------------------------------------*/
 var Game = function(){
@@ -16,9 +17,9 @@ var Game = function(){
 
   var world = new b2World(new b2Vec2(0, 9.8), true);
 
-  var groundShape = createShapeBox(1, 1);
-  var groundFixtureDef = createFixtureDef(0., 0.8, 0.1, groundShape);
-  var groundBodyDef = createStaticBodyDef(1, 2);
+  var groundShape = createShapeBox(1.5, 1);
+  var groundFixtureDef = createFixtureDef(0., 1., 0.0, groundShape);
+  var groundBodyDef = createStaticBodyDef(2, 6);
   var groundBody = world.CreateBody(groundBodyDef);
   groundBody.CreateFixture(groundFixtureDef);
 
@@ -28,50 +29,100 @@ var Game = function(){
   this.stones = [];
   this.stones_id_counter = 0;
 
-  setInterval(function(){
-    this.addStone(new Stone(0.2), 1, 0);
-  }.bind(this), 1000);
+  //setInterval(function(){
+    //this.addStone(new Stone(0.1), 2, 4);
+  //}.bind(this), 100);
+  setTimeout(function(){
+  }.bind(this), 10000);
 
   setInterval(function(){
     this.removeFallenStones();
   }.bind(this), 5000);
 };
 
+StoneData = function(stone, body, id){
+  var i, p;
+  this.stone = stone;
+  this.body = body;
+  this.id = id;
+  this.px = -1;
+  this.py = -1;
+  this.pa = -1;
+
+  this.scaled_vs = [];
+  for(i=0; i<stone.vs.length; i++){
+    p = {};
+    p.x = stone.vs[i].x * SCALE;
+    p.y = stone.vs[i].y * SCALE;
+    this.scaled_vs.push(p);
+  }
+};
+StoneData.prototype.getData = function(){
+  var p = {};
+  p.vs = this.scaled_vs;
+  p.color = this.stone.color;
+  return p;
+};
+
+StoneData.prototype.getPosData = function(force){
+  var pos, a, v, p;
+  var body = this.body;
+  if(!force && !body.IsAwake()) return null;
+  pos = body.GetPosition();
+  a = body.GetAngle();
+  if(
+    !force &&
+    Math.abs(this.px - pos.x) < .002 &&
+    Math.abs(this.py - pos.y) < .001 &&
+    Math.abs(this.pa - a) < .1
+    ) return null;
+
+  v = body.GetLinearVelocity();
+  p = {};
+  p.x = pos.x*SCALE|0;
+  p.y = pos.y*SCALE|0;
+  p.a = (a*100|0)/100;
+  p.vx = v.x*SCALE|0;
+  p.vy = v.y*SCALE|0;
+  
+  //update
+  this.px = p.x;
+  this.py = p.y;
+  this.pa = p.a;
+
+  return p;
+};
+
 Game.prototype.removeFallenStones = function(){
   var i;
   for(i=0; i<this.stones.length; i++){
     var pos = this.stones[i].body.GetPosition();
-    if(pos.y > 1){
+    if(pos.y > 6){
       this.removeStone(i);
       i--;
     }
   }
 };
 
-Game.prototype.getStonesShapeInfo = function(){
-  var i, stone, p, vs;
-  var dest = [];
+Game.prototype.getStonesData = function(){
+  var i, stone, p;
+  var dest = {};
   for(i=0; i<this.stones.length; i++){
-    p = {};
-    stone = this.stones[i].stone;
-    p.vs = stone.vs;
-    p.color = stone.color;
-    dest[this.stones[i].id] = p;
+    stone = this.stones[i];
+    p = stone.getData();
+    p.pos = stone.getPosData(true);
+    dest[stone.id] = p;
   }
   return dest;
 };
 
-Game.prototype.getStonesPosInfo = function(){
-  var i, body, p, pos, vs, x, y;
+Game.prototype.getStonesPosData = function(){
+  var i, p;
   var dest = {};
   for(i=0; i<this.stones.length; i++){
-    p = {};
-    body = this.stones[i].body;
-    pos = body.GetPosition();
-    p.x = pos.x;
-    p.y = pos.y;
-    p.a = body.GetAngle();
-    dest[this.stones[i].id] = p;
+    stone = this.stones[i];
+    p = stone.getPosData(false);
+    if(p) dest[stone.id] = p;
   }
   return dest;
 };
@@ -83,11 +134,7 @@ Game.prototype.addStone = function(stone, x, y, vx, vy){
   var fixtureDef = createFixtureDef(stone.density, stone.filter, stone.friction, shape)
   body.CreateFixture(fixtureDef);
   body.SetLinearVelocity(new b2Vec2(vx, vy));
-  this.stones.push({
-    stone: stone,
-    body: body,
-    id: this.stones_id_counter++
-  });
+  this.stones.push(new StoneData(stone, body, this.stones_id_counter++));
 };
 
 Game.prototype.removeStone = function(i){
@@ -111,7 +158,7 @@ Game.prototype.stop = function(){
 };
 
 Game.prototype.step = function(){
-  this.world.Step(this.time_step, 10, 10);
+  this.world.Step(this.time_step, 30, 30);
 };
 
 exports.Game = Game;
