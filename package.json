@@ -1,0 +1,15 @@
+{
+  "name": "iitomo_0521",
+  "version": "0.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "express": "^4.2.0",
+    "socket.io": "^0.9.16"
+  }
+}
