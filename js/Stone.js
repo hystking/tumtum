@@ -5,8 +5,8 @@ var Stone = function(scale){
   var vs = [];
   for(i=0; i<STONE_VS; i++){
     rad = Math.PI*2/STONE_VS * i;
-    x = (Math.cos(rad)*(Math.random()*0.3+0.7))*scale;
-    y = (Math.sin(rad)*(Math.random()*0.3+0.7))*scale;
+    x = (Math.cos(rad)*(Math.random()*0.4+0.6))*scale;
+    y = (Math.sin(rad)*(Math.random()*0.4+0.6))*scale;
     vs.push({x: x, y: y*0.4});
   }
   this.vs = vs;
