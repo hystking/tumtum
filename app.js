@@ -5,6 +5,10 @@ var server = http.createServer(app);
 var io = require("socket.io").listen(server, {"log level": 1});
 var RoomManager = require("./js/RoomManager").RoomManager;
 
+io.configure(function () { 
+  io.set("transports", ["xhr-polling"]); 
+  io.set("polling duration", 10); 
+ });
 server.listen(8888);
 
 var ptn = /^\/([a-zA-Z0-9_]+)$/;
