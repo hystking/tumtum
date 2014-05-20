@@ -2,7 +2,7 @@ var express = require("express")
 var app = express();
 var http = require("http");
 var server = http.createServer(app);
-var io = require("socket.io").listen(server/*, {"log level": 1}*/);
+var io = require("socket.io").listen(server, {"log level": 1});
 var RoomManager = require("./js/RoomManager").RoomManager;
 
 server.listen(8888);

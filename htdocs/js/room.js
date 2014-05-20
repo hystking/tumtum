@@ -1,50 +1,24 @@
 $(document).ready(function(){
   var socket = getSocket();
-  var world = $("#world");
-  var box_size = 200;
+  var $canvas = $("canvas");
+  var localGame = new LocalGame($canvas[0].getContext("2d"));
   window.socket = socket;
-  socket.on("push", function(data){
-    console.log(data);
-    var img_url = data.url;
-    var $img = $("<img/>");
-    $img.on("load", function(){
-      $this = $(this);
-      var real_width = this.width;
-      var real_height = this.height;
-
-      var width = box_size;
-      var height = box_size;
-
-      if(real_width > real_height){
-        width = box_size;
-        height = real_height * box_size/real_width;
-      }else{
-        width = real_width * box_size/real_height;
-        height = box_size;
-      }
-
-      world.append($this);
-      $this.css({
-        left: world.prop("clientWidth")/2-width/2+(Math.random()-0.5)*box_size+"px",
-        width: width+"px",
-        height: height+"px"
-      });
-
-      setTimeout(function(){
-        $this.box2d({'y-velocity':20});
-
-        var t_mousedown = -1;
-        $this.on("mousedown", function(){
-          t_mousedown = +new Date;
-        });
-        $this.on("mouseup", function(){
-          if(+new Date - t_mousedown < 250){
-            window.open(img_url);
-          }
-        });
-      },1);
-    });
-    $img.attr({"src": img_url});
+  window.lg = localGame;
+  socket.on("stoneData", function(data){
+    localGame.setStoneData(data);
+  });
+  socket.on("stoneDataAdd", function(data){
+    localGame.setStoneData(data, true);
+  });
+  socket.on("posData", function(data){
+    localGame.setPosData(data);
+  });
+  setInterval(function(){
+    localGame.step();
+    localGame.draw();
+  }, 1000/30);
+  $canvas.click(function(e){
+    socket.emit("addStone", {x: e.offsetX, y:e.offsetY});
   });
 });
 var getSocket = function(){
@@ -57,4 +31,119 @@ var getSocket = function(){
   console.log(socket_url);
 	var socket = io.connect(socket_url);
   return socket;
+};
+
+var LocalGame = function(ctx){
+  this.width = ctx.width;
+  this.height = ctx.height;
+  this.pos_data_local = {};
+  this.pos_data = {};
+  this.stone_data = {};
+
+  this.gradBack = ctx.createLinearGradient(0, 0, 0, 600);
+  this.gradBack.addColorStop(0, "#fff");
+  this.gradBack.addColorStop(1, "#bcd");
+
+  ctx.strokeStyle = "gray";
+  ctx.lineWidth = 3;
+  ctx.lineCap = "round";
+  this.ctx = ctx;
+};
+LocalGame.prototype.step = function(){
+  var pos_data = this.pos_data;
+  var pos_data_local = this.pos_data_local;
+
+  for(var i in pos_data){
+    pos_local = pos_data_local[i];
+    if(!pos_local) continue;
+    pos = pos_data[i];
+    pos_local.x += (pos.x - pos_local.x) * .1;
+    pos_local.y += (pos.y - pos_local.y) * .22;
+    pos_local.a += (pos.a - pos_local.a) * .1;
+
+    pos.x += pos.vx/10;
+    pos.y += pos.vy/10;
+  }
+};
+LocalGame.prototype.draw = function(){
+  var pos_body, pos_v, rad, stone, vs, i, x0, y0, x, y;
+  var pos_data_local = this.pos_data_local;
+  var stone_data = this.stone_data;
+  var ctx = this.ctx;
+
+
+  ctx.fillStyle = this.gradBack;
+  ctx.fillRect(0, 0, 1680, 600);
+
+  ctx.fillStyle = "#abc";
+  for(i=0; i<7; i++){
+    ctx.beginPath();
+    ctx.arc(120+i*240, 620, 100, 50, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  for(var i in stone_data){
+    pos_body = pos_data_local[i];
+    if(!pos_body) continue;
+    rad = pos_body.a;
+    stone = stone_data[i];
+
+    ctx.fillStyle = stone.color;
+
+    vs = stone.vs;
+    pos_v = vs[0];
+    x0 = pos_v.x * Math.cos(rad) - pos_v.y * Math.sin(rad) + pos_body.x;
+    y0 = pos_v.x * Math.sin(rad) + pos_v.y * Math.cos(rad) + pos_body.y;
+
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    for(var j=0; j<vs.length; j++){
+      pos_v = vs[j];
+      x = pos_v.x * Math.cos(rad) - pos_v.y * Math.sin(rad) + pos_body.x;
+      y = pos_v.x * Math.sin(rad) + pos_v.y * Math.cos(rad) + pos_body.y;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(x0, y0);
+    ctx.fill();
+    ctx.stroke();
+  }
+};
+LocalGame.prototype.setPosData = function(pos_data){
+  this.pos_data = pos_data; 
+};
+LocalGame.prototype.setStoneData = function(stone_data, add){
+  var pos_data = this.pos_data;
+  var pos_data_local = this.pos_data_local;
+
+  var i;
+  for(i in stone_data){
+    this.stone_data[i] = stone_data[i];
+  }
+
+  if(!add){
+    for(i in pos_data_local){
+      if(!stone_data[i]){
+        delete pos_data_local[i];
+      }
+    }
+  }
+  for(i in stone_data){
+    var stone = stone_data[i];
+    var pos_local = pos_data_local[i];
+    if(pos_local){
+      pos_data[i] = {
+        x: stone.pos.x,
+        y: stone.pos.y,
+        vx: stone.pos.vx,
+        vy: stone.pos.vy,
+        a: stone.pos.a
+      }
+    }else{
+      pos_data_local[i] = {
+        x: stone.pos.x,
+        y: stone.pos.y,
+        a: stone.pos.a
+      };
+    }
+  }
 };

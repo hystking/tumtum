@@ -23,7 +23,7 @@ canvas{
 </style>
 </head>
 <body>
-<canvas id="canvas_mine" width="1680" height="600"></canvas>
+<canvas id="canvas_mine"/>
 </body>
 <script>
 var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
@@ -151,7 +151,6 @@ setInterval(function(){
   //world.DrawDebugData();
   myStep();
   myDraw(ctx);
-  world.ClearForces();
   /*
   var body = world.GetBodyList();
   while(body){

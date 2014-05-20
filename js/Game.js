@@ -38,15 +38,9 @@ var Game = function(){
   this.stones = [];
   this.stones_id_counter = 0;
 
-  //setInterval(function(){
-    //this.addStone(new Stone(0.1), 2, 4);
-  //}.bind(this), 100);
-  setTimeout(function(){
-  }.bind(this), 10000);
-
   setInterval(function(){
     this.removeFallenStones();
-  }.bind(this), 5000);
+  }.bind(this), 3000);
 };
 
 StoneData = function(stone, body, id){
@@ -61,8 +55,8 @@ StoneData = function(stone, body, id){
   this.scaled_vs = [];
   for(i=0; i<stone.vs.length; i++){
     p = {};
-    p.x = stone.vs[i].x * SCALE;
-    p.y = stone.vs[i].y * SCALE;
+    p.x = stone.vs[i].x * SCALE | 0;
+    p.y = stone.vs[i].y * SCALE | 0;
     this.scaled_vs.push(p);
   }
 };
@@ -87,9 +81,8 @@ StoneData.prototype.getPosData = function(force){
     !force &&
     Math.abs(this.px - p.x) < 1 &&
     Math.abs(this.py - p.y) < 1 &&
-    Math.abs(this.pa - a) < .02
+    Math.abs(this.pa - a) < .01
     ) return null;
-
   v = body.GetLinearVelocity();
   p.vx = v.x*SCALE|0;
   p.vy = v.y*SCALE|0;
@@ -143,7 +136,9 @@ Game.prototype.addStone = function(stone, x, y, vx, vy){
   var fixtureDef = createFixtureDef(stone.density, stone.filter, stone.friction, shape)
   body.CreateFixture(fixtureDef);
   body.SetLinearVelocity(new b2Vec2(vx, vy));
-  this.stones.push(new StoneData(stone, body, this.stones_id_counter++));
+  var stoneData = new StoneData(stone, body, this.stones_id_counter++)
+  this.stones.push(stoneData);
+  return stoneData;
 };
 
 Game.prototype.removeStone = function(i){
