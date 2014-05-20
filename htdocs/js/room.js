@@ -18,7 +18,7 @@ $(document).ready(function(){
     localGame.draw();
   }, 1000/30);
   $canvas.click(function(e){
-    socket.emit("addStone", {x: e.offsetX, y:e.offsetY});
+    socket.emit("addStone", {x: e.pageX, y:e.pageY});
   });
 });
 var getSocket = function(){
