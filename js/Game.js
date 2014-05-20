@@ -38,6 +38,7 @@ var Game = function(){
   this.stones = [];
   this.stones_id_counter = 0;
 
+
   setInterval(function(){
     this.removeFallenStones();
   }.bind(this), 3000);

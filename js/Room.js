@@ -12,9 +12,11 @@ var Room = function(io, name_room){
   this._game.start();
   setInterval((function(){
     this._room.emit("stoneData", this._game.getStonesData());
-  }).bind(this), 1000);
+  }).bind(this), 10000);
   setInterval((function(){
-    this._room.emit("posData", this._game.getStonesPosData());
+    data = this._game.getStonesPosData();
+    if(Object.keys(data).length <= 0) return;
+    this._room.emit("posData", data);
   }).bind(this), 100);
 };
 
@@ -33,6 +35,8 @@ Room.prototype._onConnection = function(socket){
   socket.on("disconnect", this._onDisconnect.bind(self));
   socket.on("addStone", this._onAddStone.bind(self));
   console.log("connected");
+
+  socket.emit("stoneData", this._game.getStonesData());
 };
 
 Room.prototype._onAddStone = function(data){
