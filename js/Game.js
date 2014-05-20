@@ -33,7 +33,7 @@ var Game = function(){
   addGround(4.4);
   addGround(5.2);
   this.world = world;
-  this.setFps(60);
+  this.setFps(20);
   this.timer_id = -1;
   this.stones = [];
   this.stones_id_counter = 0;
