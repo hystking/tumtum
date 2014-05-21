@@ -110,7 +110,9 @@ LocalGame.prototype.draw = function(){
     ctx.fill();
     ctx.stroke();
   }
-  ctx.strokeStyle = "#f88";
+
+  var t = +new Date()%2000;
+  ctx.strokeStyle = "rgba(255,100,100,"+(2000-t)/2000+")";
   ctx.beginPath();
   ctx.moveTo(0, 100);
   ctx.lineTo(1680, 100);
