@@ -1,0 +1,76 @@
+@import base
+
+//
+//  Import Mixins
+//
+@import "mixin/replace"
+@import "mixin/hide-text"
+
+//
+//  Global Reset
+//
+
+global-reset()
+
+body, html
+  height: 100%
+
+//
+//  Wrapper Style
+//
+
+.{meta.slug}
+	-webkit-font-smoothing: antialiased
+  -moz-osx-font-smoothing: grayscale
+  position: relative
+  min-height: 100%
+  color: #333
+  font-family: font.gothic
+  &, *
+    box-sizing: border-box
+
+//
+//  Modules
+//
+
+.{meta.slug}
+  #canvas_mine
+    position: absolute
+    display: block
+
+
+  .description
+    position: absolute
+    font-size: 16px
+    line-height: 1.85
+    text-align: center
+    right: 100px
+    top: 50px
+    transform: scaleY(1.1)
+
+    .para
+      margin-top: 1em
+  .howto
+    font-size: 20px
+    position: absolute
+    text-align: center
+    font-weight: bold
+    right: 200px
+    bottom: 300px
+    transform: scaleY(1.1)
+
+    .arrow
+      position: absolute
+      left:0
+      right:0
+      margin:auto
+      animation: anim-text-down 1s linear 0 infinite
+
+@keyframes anim-text-down
+  0%
+    transform: translateY(s(10px))
+  75%
+    transform: translateY(s(20px))
+  100%
+    transform: translateY(s(20px))
+

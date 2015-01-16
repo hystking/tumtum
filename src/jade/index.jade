@@ -1,0 +1,40 @@
+extend base
+
+block meta
+  include meta
+
+block content
+  div(class=meta.slug)
+    canvas#canvas_mine(
+      width="1680"
+      height="600"
+    )
+    .description
+      .para
+        | 賽の河原は、親に先立ち亡くなった子どもたちが、
+        br
+        | その親不孝の報いを受ける場所です。
+        br
+        | 子どもたちは、河原で石を積み続けることで、
+        br
+        | 親の供養をするとされています。
+      
+      .para
+        | 彼岸つむつむは、最新の Webテクノロジーとデバイスを駆使して、
+        br
+        | 賽の河原の石積みをブラウザー上に再現しました。
+        br
+        | 石を積むために、もはや、親に先立つ必要はありません。
+        br
+        | 最高の苦行体験を、楽しみましょう。
+
+    .howto
+      | 穴に石を入れてね
+      .arrow ↓
+
+block stylesheet
+  link(href="css/style.css", rel="stylesheet")
+
+block script-body
+  script(src="js/lib/jquery.js")
+  script(src="js/app.js")
